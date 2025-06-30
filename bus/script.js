@@ -2,7 +2,7 @@
 
 // --- 전역 변수 ---
 let dayTypeToggleBtn, routeToggleBtn;
-let statusDiv, infoMessageDiv;
+let statusDiv;
 let currentScheduleType = "weekday";
 let currentRoute = "wang";
 let updateTimer = null;
@@ -167,17 +167,8 @@ function updateStatus() {
 }
 
 function updateInfoMessage() {
-  if (!infoMessageDiv) return;
-  const currentViewText =
-    currentScheduleType === "weekday"
-      ? "현재 평일 시간표를 보고 있습니다."
-      : "현재 주말·공휴일 시간표를 보고 있습니다.";
-
-  infoMessageDiv.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-    <span>${currentViewText}</span>`;
-
-  infoMessageDiv.classList.remove("warning");
+  // info-message 요소가 제거되었으므로 이 함수는 더 이상 필요하지 않음
+  return;
 }
 
 function populateTable(data, tableSelector, columns) {
@@ -244,8 +235,8 @@ function updateScheduleDisplay() {
   // Ensure timetableData variables are available (loaded from timetable_data.js)
   if (typeof weekdayWangpyeonData === "undefined") {
     // console.error("Timetable data not loaded yet.");
-    if (infoMessageDiv)
-      infoMessageDiv.innerHTML =
+    if (statusDiv)
+      statusDiv.innerHTML =
         "시간표 데이터를 불러오지 못했습니다. timetable_data.js 파일이 올바른지 확인해주세요.";
     return;
   }
@@ -265,7 +256,6 @@ function updateScheduleDisplay() {
     columns = ["연번", "부산대", "밀양역발", "영남루"];
   }
 
-  updateInfoMessage();
   updateTimetableContainersDisplay();
   populateTable(dataToUse, tableSelector, columns);
   updateStatus();
@@ -341,10 +331,9 @@ function getDOMElements() {
   dayTypeToggleBtn = document.getElementById("day-type-toggle-btn");
   routeToggleBtn = document.getElementById("route-toggle-btn");
   statusDiv = document.getElementById("status");
-  infoMessageDiv = document.getElementById("info-message");
 
   // 하나라도 없으면 false 반환 (이로 인해 initializePage가 중단될 수 있음)
-  return !!(dayTypeToggleBtn && routeToggleBtn && statusDiv && infoMessageDiv);
+  return !!(dayTypeToggleBtn && routeToggleBtn && statusDiv);
 }
 
 // 버튼들에 이벤트 리스너를 설정합니다.
@@ -379,22 +368,9 @@ function checkDarkMode() {
 function initializePage() {
   if (!getDOMElements()) {
     // getDOMElements에서 모든 필수 요소를 찾았는지 확인
-    const initialInfoMsgDiv = document.getElementById("info-message"); // 다시 한번 시도
-    if (initialInfoMsgDiv) {
-      // infoMessageDiv가 null이 아닐때만 내부 HTML 수정 시도
-      initialInfoMsgDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg><span>웹 페이지 구성에 필요한 요소를 찾을 수 없습니다. HTML의 ID를 확인해주세요.</span>`;
-      initialInfoMsgDiv.classList.add("warning");
-      initialInfoMsgDiv.style.display = "flex"; // 보이도록 강제
-    } else {
-      console.error(
-        "심각한 오류: info-message div 조차 찾을 수 없어 사용자에게 오류를 알릴 수 없습니다."
-      );
-    }
-    // 필수 요소가 없으므로, 이후 로직(시간표 표시 등) 실행 안함
+    console.error("필수 DOM 요소를 찾을 수 없습니다.");
     return;
   }
-
-  infoMessageDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>시간표 데이터를 준비하고 있습니다...</span>`;
 
   // timetable_data.js에 정의된 변수들이 전역적으로 사용 가능해야 함
   sortTimeData(weekdayWangpyeonData, "영남루", "밀양역");
